@@ -11,7 +11,8 @@ vibe_vault = "AsRo4gj9W5MW39xRmsToGkjMKesfwujQg97H7KuyVCcM"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "https://detailed-sharleen-fast-devnet.helius-rpc.com"
+# cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

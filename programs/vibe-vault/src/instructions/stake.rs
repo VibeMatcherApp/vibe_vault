@@ -23,7 +23,7 @@ pub struct Stake<'info> {
     pub user_ata: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
-        seeds=[VaultState::SEEDS],
+        seeds=[VaultState::SEEDS, mint.key().as_ref()],
         bump
     )]
     pub vault_state: Account<'info, VaultState>,

@@ -1,5 +1,4 @@
 use crate::state::VaultState;
-use crate::constants::MINT;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -11,13 +10,15 @@ use anchor_spl::{
 pub struct Initialize<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-
+    #[account(
+        mint::token_program = token_program
+    )]
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(
         init,
         payer = user,
         space = 8 + VaultState::INIT_SPACE,
-        seeds = [VaultState::SEEDS],
+        seeds = [VaultState::SEEDS, mint.key().as_ref()],
         bump
     )]
     pub state: Account<'info, VaultState>,
@@ -39,7 +40,7 @@ pub struct Initialize<'info> {
 impl<'info> Initialize<'info> {
     pub fn initialize(&mut self, bumps: &InitializeBumps) -> Result<()> {
         self.state.set_inner(VaultState {
-            mint: MINT,
+            mint: self.mint.key(),
             vault_bump: bumps.state
         });
         Ok(())

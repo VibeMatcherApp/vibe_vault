@@ -24,7 +24,7 @@ pub struct Unstake<'info> {
     pub user_ata: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
-        seeds=[VaultState::SEEDS],
+        seeds=[VaultState::SEEDS, mint.key().as_ref()],
         bump
     )]
     pub vault_state: Account<'info, VaultState>,
@@ -52,14 +52,17 @@ pub struct Unstake<'info> {
 impl<'info> Unstake<'info> {
     pub fn validate(&mut self, withdraw: u64) -> Result<()> {
         let current_stake_amount = self.user_state.staked_amount;
-        check_condition!(current_stake_amount > withdraw, IlegalWithdraw);
+        check_condition!(current_stake_amount >= withdraw, IlegalWithdraw);
         check_condition!(self.user_state.staked_at + self.user_state.lock_time < Clock::get()?.unix_timestamp, CustomError);
         Ok(())
     }
 
     pub fn withdraw(&mut self, withdraw: u64) -> Result<()> {
         self.validate(withdraw)?;
-        let signer_seeds: [&[&[u8]]; 1] = [&[VaultState::SEEDS, &[self.vault_state.vault_bump]]];
+        let signer_seeds: [&[&[u8]]; 1] = [&[
+            VaultState::SEEDS,
+            self.mint.to_account_info().key.as_ref(),
+            &[self.vault_state.vault_bump]]];
 
         let xfer_accounts = TransferChecked {
             from: self.vault.to_account_info(),
