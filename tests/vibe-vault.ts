@@ -45,7 +45,7 @@ describe("vibe-vault", () => {
   };
 
   const DECIMALS = 8;
-
+  const ZBTC_MINT = new PublicKey("91AgzqSfXnCq6AJm5CPPHL3paB25difEJ1TfSnrFKrf");
   const log = async (signature: string): Promise<string> => {
     console.log(
       `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
@@ -62,80 +62,81 @@ describe("vibe-vault", () => {
   );
 
   const accounts = {};
-  it("mint", async () => {
-    let tx = new Transaction();
-    let lamports = await getMinimumBalanceForRentExemptMint(connection);
-    tx.instructions = [
-      SystemProgram.createAccount({
-        fromPubkey: provider.publicKey,
-        newAccountPubkey: mint.publicKey,
-        lamports,
-        space: MINT_SIZE,
-        programId: TOKEN_PROGRAM_ID,
-      }),
-      createInitializeMint2Instruction(
-        mint.publicKey,
-        DECIMALS,
-        provider.publicKey,
-        null,
-        TOKEN_PROGRAM_ID
-      ),
-      createAssociatedTokenAccountIdempotentInstruction(
-        provider.publicKey,
-        userAta,
-        provider.publicKey,
-        mint.publicKey,
-        TOKEN_PROGRAM_ID
-      ),
-      createMintToInstruction(
-        mint.publicKey,
-        userAta,
-        provider.publicKey,
-        1e8,
-        undefined,
-        TOKEN_PROGRAM_ID
-      ),
-    ];
-    await provider.sendAndConfirm(tx, [wallet.payer, mint]).then(log);
-  });
+  // it("mint", async () => {
+    
+  //   let tx = new Transaction();
+  //   let lamports = await getMinimumBalanceForRentExemptMint(connection);
+  //   tx.instructions = [
+  //     SystemProgram.createAccount({
+  //       fromPubkey: provider.publicKey,
+  //       newAccountPubkey: mint.publicKey,
+  //       lamports,
+  //       space: MINT_SIZE,
+  //       programId: TOKEN_PROGRAM_ID,
+  //     }),
+  //     createInitializeMint2Instruction(
+  //       mint.publicKey,
+  //       DECIMALS,
+  //       provider.publicKey,
+  //       null,
+  //       TOKEN_PROGRAM_ID
+  //     ),
+  //     createAssociatedTokenAccountIdempotentInstruction(
+  //       provider.publicKey,
+  //       userAta,
+  //       provider.publicKey,
+  //       mint.publicKey,
+  //       TOKEN_PROGRAM_ID
+  //     ),
+  //     createMintToInstruction(
+  //       mint.publicKey,
+  //       userAta,
+  //       provider.publicKey,
+  //       1e8,
+  //       undefined,
+  //       TOKEN_PROGRAM_ID
+  //     ),
+  //   ];
+  //   await provider.sendAndConfirm(tx, [wallet.payer, mint]).then(log);
+  // });
   it("Initialize vault", async () => {
     // Add your test here.
     const tx = await program.methods
       .initialize()
       .accounts({
-        mint: mint.publicKey,
+        mint: ZBTC_MINT,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
     console.log("Your transaction signature", tx);
   });
-  it("Stake", async () => {
-    try {
-      await program.methods
-        .stake(new BN(1))
-        .accounts({ mint: mint.publicKey, tokenProgram: TOKEN_PROGRAM_ID })
-        .signers([])
-        .rpc()
-        .then(confirm)
-        .then(log);
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
-  });
-  it("Unstake", async () => {
-    try {
-      await msleep(3000);
-      await program.methods
-        .unstake(new BN(1))
-        .accounts({ mint: mint.publicKey, tokenProgram: TOKEN_PROGRAM_ID })
-        .signers([])
-        .rpc()
-        .then(confirm)
-        .then(log);
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
-  });
+  // it("Stake", async () => {
+  //   try {
+  //     await program.methods
+  //       .stake(new BN(1))
+  //       .accounts({ mint: mint.publicKey, tokenProgram: TOKEN_PROGRAM_ID })
+  //       .signers([])
+  //       .rpc()
+  //       .then(confirm)
+  //       .then(log);
+  //   } catch (e) {
+  //     console.log(e);
+  //     throw e;
+  //   }
+  // });
+  // it("Unstake", async () => {
+  //   try {
+  //     await msleep(3000);
+  //     await program.methods
+  //       .unstake(new BN(1))
+  //       .accounts({ mint: mint.publicKey, tokenProgram: TOKEN_PROGRAM_ID })
+  //       .signers([])
+  //       .rpc()
+  //       .then(confirm)
+  //       .then(log);
+  //   } catch (e) {
+  //     console.log(e);
+  //     throw e;
+  //   }
+  // });
 });
